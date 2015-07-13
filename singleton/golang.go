@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -9,11 +10,16 @@ type ton struct {
 	Time string
 }
 
+func (t *ton) String() string {
+	return fmt.Sprintf("%s\t", t.Time)
+}
+
 var singleTon *ton
 
 func GetSingleton1() *ton {
 	if nil == singleTon {
-		singleTon = &ton{}
+		time.Sleep(3e9)
+		singleTon = &ton{Time: time.Now().String()}
 	}
 	return singleTon
 }
@@ -21,7 +27,7 @@ func GetSingleton1() *ton {
 var locker chan bool
 
 func init() {
-	locker = make(chan bool)
+	locker = make(chan bool, 1)
 	locker <- true
 }
 func GetSingleton2() *ton {
@@ -30,15 +36,19 @@ func GetSingleton2() *ton {
 		locker <- true
 	}()
 	if nil == singleTon {
-		singleTon = &ton{}
+		time.Sleep(3e9)
+		singleTon = &ton{Time: time.Now().String()}
 	}
 	return singleTon
 }
 
+var once sync.Once
+
 func GetSingleton3() *ton {
-	sync.Once(func() {
+	once.Do(func() {
 		if nil == singleTon {
-			singleTon = &ton{}
+			time.Sleep(3e9)
+			singleTon = &ton{Time: time.Now().String()}
 		}
 	})
 	return singleTon
