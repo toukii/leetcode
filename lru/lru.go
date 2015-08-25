@@ -32,8 +32,8 @@ func (c *LRUCache) Display() {
 
 type LRU struct {
 	pre, next *LRU
-	key       string
-	v         interface{}
+	Key       string
+	Val       interface{}
 }
 
 func (l *LRU) del() {
@@ -42,13 +42,13 @@ func (l *LRU) del() {
 }
 
 func (l *LRU) String() string {
-	return fmt.Sprintf("%s:%v", l.key, l.v)
+	return fmt.Sprintf("%s:%v", l.Key, l.Val)
 }
 
-func newLRU(k string, v interface{}) *LRU {
+func NewLRU(k string, v interface{}) *LRU {
 	return &LRU{
-		key:  k,
-		v:    v,
+		Key:  k,
+		Val:  v,
 		pre:  nil,
 		next: nil,
 	}
@@ -63,7 +63,7 @@ func (c *LRUCache) Last() *LRU {
 }
 
 func (c *LRUCache) Set(key string, v interface{}) {
-	_new_lru := newLRU(key, v)
+	_new_lru := NewLRU(key, v)
 	if len(c.v) <= 0 {
 		c.v[key] = _new_lru
 		c.next = _new_lru
@@ -75,18 +75,10 @@ func (c *LRUCache) Set(key string, v interface{}) {
 	cur, ok := c.v[key]
 	if ok {
 		cur.del()
-		c.v[key] = _new_lru
-		cur = c.v[key]
-		cur.pre = c.pre
-		cur.next = c.next
-		c.next = cur
-		cur.next.pre = cur
-		cur.pre.next = cur
-		return
 	}
-	if len(c.v) >= c.size {
+	if len(c.v) >= c.size && !ok {
 		last := c.Last()
-		delete(c.v, last.key)
+		delete(c.v, last.Key)
 		last.del()
 		if c.pre == last {
 			c.pre = last.pre
@@ -107,7 +99,7 @@ func (c *LRUCache) Get(key string) interface{} {
 		return nil
 	}
 	if c.next == cur {
-		return cur.v
+		return cur.Val
 	}
 	cur.del()
 	if c.pre == cur {
@@ -118,5 +110,5 @@ func (c *LRUCache) Get(key string) interface{} {
 	c.next = cur
 	cur.next.pre = cur
 	cur.pre.next = cur
-	return cur.v
+	return cur.Val
 }
