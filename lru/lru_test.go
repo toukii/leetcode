@@ -36,16 +36,14 @@ func TestLRUSetGet(t *testing.T) {
 	assert(t, cache.Latest().key, "2")
 
 	cache.Get("1")
-	t.Log(cache.v)
 	assert(t, cache.Last().key, "2")
 	assert(t, cache.Latest().key, "1")
 
 	cache.Set("3", "three")
-	t.Log(cache.v)
 	assert(t, cache.Last().key, "1")
 	assert(t, cache.Latest().key, "3")
 
-	// cache.Get("1")
-	// assert(t, cache.Last().key, "3")
-	// assert(t, cache.Latest().key, "1")
+	cache.Get("1")
+	assert(t, cache.Last().key, "3")
+	assert(t, cache.Latest().key, "1")
 }
