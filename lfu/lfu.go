@@ -82,7 +82,8 @@ type subNode struct {
 func (c *LFUCache) Get(key string) (cur *LFU) {
 	cur, exist := c.v[key]
 	if !exist {
-		// c.Lock()
+		c.Lock()
+		defer c.Unlock()
 		out_cur, out_exist := c.outv[key]
 		if out_exist {
 			out_cur.N++
