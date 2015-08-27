@@ -83,14 +83,24 @@ func (c *LFUCache) Get(key string) (cur *LFU) {
 	cur, exist := c.v[key]
 	if !exist {
 		// c.Lock()
-		// out_cur, out_exist := c.outv[key]
-		// if out_exist {
-		// 	delete(c.outv, key)
-		// 	c.v[key] = out_cur
-		// 	c.Unlock()
-		// 	c.Set(key, out_cur.V)
-		// 	return out_cur
-		// }
+		out_cur, out_exist := c.outv[key]
+		if out_exist {
+			out_cur.N++
+			delete(c.outv, key)
+			c.v[key] = out_cur
+			out_cur.pre = c.last
+			out_cur.next = nil
+			c.last.next = out_cur
+			c.last = out_cur
+			// del pre
+			pre := c.last.pre
+			pre.pre.next = pre.next
+			pre.next.pre = pre.pre
+			delete(c.v, pre.Key)
+			c.outv[pre.Key] = pre
+			c.moveForward(key)
+			return out_cur
+		}
 		return nil
 	}
 	c.Lock()
