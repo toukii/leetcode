@@ -1,4 +1,4 @@
-package lfu
+package lfu_
 
 import (
 	"testing"

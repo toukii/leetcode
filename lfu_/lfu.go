@@ -1,13 +1,15 @@
-package lfu
+package lfu_
 
 import (
 	"fmt"
+	"sync"
 )
 
 type LFUCache struct {
 	last, latest *LFU
 	size         int
 	v            map[string]*LFU
+	sync.RWMutex
 }
 
 func NewLFUCache(size int) *LFUCache {
@@ -18,8 +20,8 @@ func NewLFUCache(size int) *LFUCache {
 }
 
 func (c *LFUCache) Display() {
-	// c.RLock()
-	// defer c.RUnlock()
+	c.RLock()
+	defer c.RUnlock()
 	first := true
 	i := 0
 	for lfu := c.latest; lfu != nil; lfu = lfu.next {
@@ -37,10 +39,14 @@ func (c *LFUCache) Display() {
 }
 
 func (c *LFUCache) Latest() *LFU {
+	c.RLock()
+	defer c.RUnlock()
 	return c.latest
 }
 
 func (c *LFUCache) Last() *LFU {
+	c.RLock()
+	defer c.RUnlock()
 	return c.last
 }
 
@@ -73,6 +79,8 @@ func (c *LFUCache) Get(key string) (cur *LFU) {
 	if !exist {
 		return nil
 	}
+	c.Lock()
+	defer c.Unlock()
 	cur.N++
 	// only one node
 	if len(c.v) <= 1 {
@@ -111,6 +119,8 @@ func (c *LFUCache) Get(key string) (cur *LFU) {
 }
 
 func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
+	c.Lock()
+	defer c.Unlock()
 	cur, exist := c.v[key]
 	if !exist {
 		cur = NewLFU(key, v)
@@ -128,6 +138,8 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 	}
 	// update cache key
 	cur.V = v
+	c.Unlock()
 	c.Get(key)
+	c.Lock()
 	return
 }
