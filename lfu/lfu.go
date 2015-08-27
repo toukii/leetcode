@@ -9,13 +9,18 @@ type LFUCache struct {
 	last, latest *LFU
 	size         int
 	v            map[string]*LFU
+	outv         map[string]*LFU
 	sync.RWMutex
 }
 
 func NewLFUCache(size int) *LFUCache {
+	if size <= 1 {
+		panic("it makes no sense.")
+	}
 	return &LFUCache{
 		size: size,
 		v:    make(map[string]*LFU),
+		outv: make(map[string]*LFU),
 	}
 }
 
@@ -77,6 +82,15 @@ type subNode struct {
 func (c *LFUCache) Get(key string) (cur *LFU) {
 	cur, exist := c.v[key]
 	if !exist {
+		// c.Lock()
+		// out_cur, out_exist := c.outv[key]
+		// if out_exist {
+		// 	delete(c.outv, key)
+		// 	c.v[key] = out_cur
+		// 	c.Unlock()
+		// 	c.Set(key, out_cur.V)
+		// 	return out_cur
+		// }
 		return nil
 	}
 	c.Lock()
@@ -107,6 +121,15 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 		if len(c.v) <= 0 {
 			c.latest = cur
 		} else {
+			if len(c.v) >= c.size {
+				// delete the last node
+				// c.last.pre = nil
+				// c.last.pre.next = nil
+				delete(c.v, c.last.Key)
+				c.outv[c.last.Key] = c.last
+				c.last = c.last.pre
+				c.last.next = nil
+			}
 			cur.pre = c.last
 			c.last.next = cur
 		}
