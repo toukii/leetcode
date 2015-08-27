@@ -2,12 +2,14 @@ package lru
 
 import (
 	"fmt"
+	"sync"
 )
 
 type LRUCache struct {
 	v    map[string]*LRU
 	size int
 	LRU
+	sync.RWMutex
 }
 
 func NewLRUCache(size int) *LRUCache {
@@ -19,6 +21,8 @@ func NewLRUCache(size int) *LRUCache {
 }
 
 func (c *LRUCache) Display() {
+	c.RLock()
+	defer c.RUnlock()
 	first := true
 	for lru := c.next; lru != nil; lru = lru.next {
 		if lru == c.next && !first {
@@ -55,14 +59,20 @@ func NewLRU(k string, v interface{}) *LRU {
 }
 
 func (c *LRUCache) Latest() *LRU {
+	c.RLock()
+	defer c.RUnlock()
 	return c.next
 }
 
 func (c *LRUCache) Last() *LRU {
+	c.RLock()
+	defer c.RUnlock()
 	return c.pre
 }
 
 func (c *LRUCache) Set(key string, v interface{}) {
+	c.Lock()
+	defer c.Unlock()
 	_new_lru := NewLRU(key, v)
 	if len(c.v) <= 0 {
 		c.v[key] = _new_lru
@@ -77,7 +87,7 @@ func (c *LRUCache) Set(key string, v interface{}) {
 		cur.del()
 	}
 	if len(c.v) >= c.size && !ok {
-		last := c.Last()
+		last := c.pre
 		delete(c.v, last.Key)
 		last.del()
 		if c.pre == last {
@@ -94,6 +104,8 @@ func (c *LRUCache) Set(key string, v interface{}) {
 }
 
 func (c *LRUCache) Get(key string) interface{} {
+	c.RLock()
+	defer c.RUnlock()
 	cur, ok := c.v[key]
 	if !ok {
 		return nil
