@@ -104,12 +104,12 @@ func (c *LRUCache) Set(key string, v interface{}) {
 }
 
 func (c *LRUCache) Get(key string) interface{} {
-	c.RLock()
-	defer c.RUnlock()
 	cur, ok := c.v[key]
 	if !ok {
 		return nil
 	}
+	c.Lock()
+	defer c.Unlock()
 	if c.next == cur {
 		return cur.Val
 	}
