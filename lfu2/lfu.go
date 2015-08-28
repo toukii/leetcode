@@ -75,10 +75,10 @@ func (l *LFU) String() string {
 }
 
 func (c *LFUCache) Get(key string) (cur *LFU) {
+	c.Lock()
+	defer c.Unlock()
 	cur, exist := c.v[key]
 	if !exist {
-		c.Lock()
-		defer c.Unlock()
 		out_cur, out_exist := c.remv[key]
 		if out_exist {
 			c.revoke(key)
@@ -86,8 +86,6 @@ func (c *LFUCache) Get(key string) (cur *LFU) {
 		}
 		return nil
 	}
-	c.Lock()
-	defer c.Unlock()
 	cur.N++
 	if cur == c.latest {
 		return
