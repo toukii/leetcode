@@ -92,7 +92,7 @@ func (c *LFUCache) Get(key string) (cur *LFU) {
 	if cur == c.latest {
 		return
 	}
-	c.moveFrom(cur, cur.pre)
+	c.move(cur, cur.pre)
 	return
 }
 
@@ -100,11 +100,16 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 	c.Lock()
 	defer c.Unlock()
 	cur, exist := c.v[key]
+	// fmt.Println(exist, key, cur, c.v)
 	if !exist {
 		cur_remv, ok := c.remv[key]
 		if ok {
 			c.revoke(key)
 			return cur_remv
+		}
+		// remove the last node
+		if len(c.v) >= c.size {
+			c.remove()
 		}
 		cur = NewLFU(key, v)
 		c.v[key] = cur
@@ -122,10 +127,11 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 	if cur == c.latest {
 		return
 	}
-	c.moveFrom(cur, cur.pre)
+	c.move(cur, cur.pre)
 	return
 }
 
+// remove the last node from dequeue to remv
 func (c *LFUCache) remove() {
 	remv := c.last
 	c.last = remv.pre
@@ -135,7 +141,7 @@ func (c *LFUCache) remove() {
 	delete(c.v, remv.Key)
 }
 
-// location
+// location, from is the node before n
 func (c *LFUCache) loc(n int, from *LFU) *LFU {
 	var tmp *LFU
 	for tmp = from; tmp != nil && tmp.N <= n; tmp = tmp.pre {
@@ -154,16 +160,18 @@ func (c *LFUCache) revoke(key string) {
 	cur.N++
 	dst := c.loc(cur.N, c.last)
 	c.in(dst, cur)
+	c.v[key] = cur
 }
 
 // cur is inside of the dequeue, from is the node before cur
-func (c *LFUCache) moveFrom(cur, from *LFU) {
+func (c *LFUCache) move(cur, from *LFU) {
 	if cur == c.latest || from == nil {
 		return
 	}
 	dst := c.loc(cur.N, from)
+
 	// location is currect now
-	if dst == from.pre {
+	if dst == from {
 		return
 	}
 	c.out(cur)
@@ -171,6 +179,7 @@ func (c *LFUCache) moveFrom(cur, from *LFU) {
 	return
 }
 
+// insert cur after dst
 func (c *LFUCache) in(dst, cur *LFU) {
 	// cur will be the latest node
 	if dst == nil {
@@ -193,6 +202,7 @@ func (c *LFUCache) in(dst, cur *LFU) {
 	dst.next = cur
 }
 
+// pick cur outof the dequeue
 func (c *LFUCache) out(cur *LFU) {
 	// if cur == nil || cur.pre == nil {
 	// 	panic("cur must not be nil")
@@ -204,52 +214,5 @@ func (c *LFUCache) out(cur *LFU) {
 		c.last.next = nil
 	}
 	cur.pre.next = cur.next
-}
-
-func (c *LFUCache) moveForward(key string) {
-	cur, ok := c.v[key]
-	if !ok {
-		panic("cur key must be not nil")
-	}
-	// only one node
-	if len(c.v) <= 1 {
-		return
-	}
-	if c.latest == cur {
-		return
-	}
-	if cur.pre != nil {
-		if cur.pre.N > cur.N {
-			return
-		}
-		if c.last == cur {
-			c.last = cur.pre
-		}
-		cur.pre.next = cur.next
-		cur.pre = nil
-	}
-	// cur is the last node
-	if cur.next != nil {
-		cur.next.pre = cur.pre
-	}
-	var tmp *LFU
-	for tmp = cur.pre; tmp != nil && tmp.N <= cur.N; tmp = tmp.pre {
-	}
-	// cur will be the latest node
-	if tmp == nil {
-		c.latest.pre = cur
-		cur.next = c.latest
-		c.latest = cur
-		return
-	}
-	// insert cur after tmp
-	if tmp == cur.pre {
-		return
-	}
-	cur.pre.next = cur.next
-
-	cur.next = tmp.next
-	cur.pre = tmp
-	tmp.next.pre = cur
-	tmp.next = cur
+	cur.pre = nil
 }
