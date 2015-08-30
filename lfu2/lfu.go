@@ -24,6 +24,27 @@ func NewLFUCache(size int) *LFUCache {
 	}
 }
 
+func (c *LFUCache) Vals() []*LFU {
+	c.RLock()
+	defer c.RUnlock()
+	ret := make([]*LFU, 0, c.size)
+	for lfu := c.latest; lfu != nil; lfu = lfu.next {
+		ret = append(ret, lfu)
+	}
+	return ret
+}
+
+func (c *LFUCache) Flush() {
+	c.Lock()
+	defer c.Unlock()
+	for _, it := range c.v {
+		it.N = 1
+	}
+	for _, it := range c.remv {
+		it.N = 1
+	}
+}
+
 func (c *LFUCache) Display() {
 	c.RLock()
 	defer c.RUnlock()
