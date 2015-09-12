@@ -1,3 +1,5 @@
+/*计算麻将翻几番
+ */
 package huawei
 
 import (
