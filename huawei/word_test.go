@@ -1,3 +1,4 @@
+/*查找单词，是否存在*/
 package huawei
 
 import (
