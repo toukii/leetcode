@@ -1,13 +1,13 @@
 package nowcoder
 
-import (
-	"fmt"
-	"testing"
-)
+// import (
+// 	"fmt"
+// 	"testing"
+// )
 
-func LongMax(arr []int) int {
-	length := len(arr)
-	if length <= 1 {
+// func LongMax(arr []int) int {
+// 	length := len(arr)
+// 	if length <= 1 {
 
-	}
-}
+// 	}
+// }
