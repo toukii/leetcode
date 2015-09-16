@@ -27,7 +27,7 @@ func DeepMatch(s, e string, si, ei int) bool {
 
 func TestMatch(t *testing.T) {
 	s := "aabc"
-	e := "a*bc"
+	e := "a*b.*"
 	matched := DeepMatch(s, e, 0, 0)
 	t.Log(matched)
 }
