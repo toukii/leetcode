@@ -4,6 +4,9 @@ import (
 	"testing"
 )
 
+// 正则匹配
+// *匹配它前一个字符的0个或多个；.可匹配一个任意字符
+// 如 .*可匹配任意字符
 func DeepMatch(s, e string, si, ei int) bool {
 	sL := len(s)
 	eL := len(e)
