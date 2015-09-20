@@ -22,8 +22,8 @@ func LongSum(arr []int, target int) int {
 			if R-L > Long {
 				Long = R - L
 			}
-			sum -= arr[L]
-			L++
+			sum += arr[R]
+			R++
 		}
 	}
 	if sum == target && R-L > Long {
