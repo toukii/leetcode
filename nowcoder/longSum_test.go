@@ -1,7 +1,6 @@
 package nowcoder
 
 import (
-	"fmt"
 	"testing"
 )
 
