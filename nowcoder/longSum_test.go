@@ -9,14 +9,14 @@ func LongSum(arr []int, target int) int {
 	length := len(arr)
 	sum := 0
 	Long := 0
-	L, R := 0, 0
+	L, R := -1, 0
 	for L < length && R < length {
 		if sum < target {
 			sum += arr[R]
 			R++
 		} else if sum > target {
-			sum -= arr[L]
 			L++
+			sum -= arr[L]
 		} else {
 			if R-L > Long {
 				Long = R - L
@@ -25,10 +25,10 @@ func LongSum(arr []int, target int) int {
 			R++
 		}
 	}
-	if sum == target && R-L > Long {
-		return R - L
-	}
-	return Long
+	// if sum == target && R-L > Long {
+	// 	return R - L
+	// }
+	return Long - 1
 }
 
 func TestLongSum(t *testing.T) {
