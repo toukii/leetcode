@@ -8,6 +8,10 @@ func SpiltEqual(arr []int) ([]int, []int, bool) {
 	return nil, nil, false
 }
 
+func dfs() {
+
+}
+
 func TestSE(t *testing.T) {
 	arr := []int{1, 5, 2, 6, 3, 5}
 	SpiltEqual(arr)
