@@ -9,7 +9,8 @@ func SpiltEqual(arr []int) ([]int, []int, bool) {
 }
 
 func dfs() {
-
+	return
+	dfs()
 }
 
 func TestSE(t *testing.T) {
