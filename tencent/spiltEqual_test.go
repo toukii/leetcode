@@ -14,7 +14,7 @@ func SpiltEqual(arr []int) ([]int, []int, bool) {
 		return nil, nil, false
 	}
 	visited := make([]bool, len(arr))
-	spiltArr := []int{}
+	spiltArr := make([]int, 0, len(arr)-1)
 	ret := dfs(0, 0, target>>1, arr, visited, spiltArr)
 	return nil, nil, ret
 }
