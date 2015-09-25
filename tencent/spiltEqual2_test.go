@@ -9,7 +9,7 @@ var (
 	times = 0
 )
 
-// 数组元素使用加减法，和为0
+// 数组元素使用加减法，运算结果为0
 func SpiltEqual2(arr []int) bool {
 	Open := make(map[int]bool)
 	length := len(arr)
