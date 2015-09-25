@@ -9,7 +9,7 @@ var (
 	times = 0
 )
 
-// 把数组分为两组，使两组加减相等
+// 数组元素使用加减法，和为0
 func SpiltEqual2(arr []int) bool {
 	Open := make(map[int]bool)
 	length := len(arr)
