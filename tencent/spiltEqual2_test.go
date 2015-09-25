@@ -52,5 +52,5 @@ func TestSE2(t *testing.T) {
 	ret := SpiltEqual2(arr)
 	fmt.Println(ret)
 	// +1 +5 +6
-	// +4 +6 +5
+	// -4 -3 -5
 }
