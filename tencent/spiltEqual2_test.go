@@ -6,28 +6,28 @@ import (
 )
 
 // 把数组分为两组，使两组加减相等
-func SpiltEqual2(arr []int) ([]int, []int, bool) {
-	target := 0
-	for _, it := range arr {
-		target += it
+func SpiltEqual2(arr []int) bool {
+	Open := make(map[int]bool)
+	length := len(arr)
+	for i := 0; i < length; i++ {
+		Open[i] = true
 	}
-	if target%2 == 1 {
-		return nil, nil, false
-	}
-	visited := make([]bool, len(arr))
-	spiltArr := make([]int, 0, len(arr)-1)
-	ret := DFS(0, 0, target>>1, arr, visited, spiltArr, true)
-	return nil, nil, ret
+	spiltArr := make([]int, 0, length)
+	Open[length-1] = false
+	delete(Open)
+	ret := DFS(0, 0, arr, Open, spiltArr, true) || DFS(0, 0, arr, Open, spiltArr, false)
+	return ret
 }
 
-func DFS(i, sum, target int, arr []int, visited []bool, spiltArr []int, flag bool) bool {
+func DFS(i, sum int, arr []int, Open map[int]bool, spiltArr []int, flag bool) bool {
 	cur := arr[i]
 	if !flag {
 		cur *= -1
 	}
-	if sum+arr[i] > target {
-		return false
-	} else if sum+cur == target {
+	if condition {
+
+	}
+	if sum+cur == target {
 		spiltArr = append(spiltArr, cur)
 		fmt.Println(spiltArr)
 		return true
