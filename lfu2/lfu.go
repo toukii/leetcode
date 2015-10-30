@@ -133,6 +133,7 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 			return cur_remv
 		}
 		// remove the last node
+		fmt.Println(c.size, len(c.v))
 		if len(c.v) >= c.size {
 			c.remove()
 		}
