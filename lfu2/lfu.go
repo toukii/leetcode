@@ -24,6 +24,12 @@ func NewLFUCache(size int) *LFUCache {
 	}
 }
 
+func (c *LFUCache) Resize(size int) {
+	c.Lock()
+	defer c.Unlock()
+	c.size = size
+}
+
 func (c *LFUCache) Vals() []*LFU {
 	c.RLock()
 	defer c.RUnlock()
