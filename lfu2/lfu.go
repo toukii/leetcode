@@ -39,6 +39,18 @@ func (c *LFUCache) Insize(dlk int) {
 func (c *LFUCache) Desize(dlk int) {
 	c.Lock()
 	defer c.Unlock()
+	rem_c := c.size - len(c.v)
+	if rem_c < dlk {
+		rem_c = dlk - rem_c
+		if rem_c >= len(c.v) {
+			rem_c = len(c.v) - 1
+		}
+		for i := 0; i < rem_c; i++ {
+			last := c.last
+			c.remove()
+			c.remv[last.Key] = last
+		}
+	}
 	c.size -= dlk
 	if c.size < 1 {
 		c.size = 1
@@ -182,6 +194,9 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 
 // remove the last node from dequeue to remv
 func (c *LFUCache) remove() {
+	if len(c.v) < 1 {
+		return
+	}
 	remv := c.last
 	c.last = remv.pre
 	remv.pre = nil
