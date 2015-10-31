@@ -30,6 +30,21 @@ func (c *LFUCache) Resize(size int) {
 	c.size = size
 }
 
+func (c *LFUCache) Insize(dlk int) {
+	c.Lock()
+	defer c.Unlock()
+	c.size += dlk
+}
+
+func (c *LFUCache) Desize(dlk int) {
+	c.Lock()
+	defer c.Unlock()
+	c.size -= dlk
+	if c.size < 1 {
+		c.size = 1
+	}
+}
+
 func (c *LFUCache) Vals() []*LFU {
 	c.RLock()
 	defer c.RUnlock()
@@ -129,15 +144,23 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 	if !exist {
 		cur_remv, ok := c.remv[key]
 		if ok {
+			// resize
+			if len(c.v) < c.size {
+				cur = cur_remv
+				cur.N++
+				cur.V = v
+				delete(c.remv, key)
+				goto ReSize_ADD
+			}
 			c.revoke(key)
 			return cur_remv
 		}
 		// remove the last node
-		fmt.Println(c.size, len(c.v))
 		if len(c.v) >= c.size {
 			c.remove()
 		}
 		cur = NewLFU(key, v)
+	ReSize_ADD:
 		c.v[key] = cur
 		// cur will be the first node
 		if len(c.v) <= 1 {
