@@ -154,7 +154,7 @@ func (c *LFUCache) WhistPut(key string, v interface{}) (cur *LFU) {
 				delete(c.remv, key)
 				goto ReSize_ADD
 			}
-			// c.revoke(key)
+			c.revoke(key)
 			return cur_remv
 		}
 		// remove the last node
