@@ -128,6 +128,61 @@ func (l *LFU) String() string {
 	return fmt.Sprintf("<%d times> %s:%v", l.N, l.Key, l.V)
 }
 
+func (c *LFUCache) Attach(key string) (cur *LFU) {
+	c.RLock()
+	defer c.RUnlock()
+	cur, exist := c.v[key]
+	if exist {
+		return cur
+	}
+	return nil
+}
+
+func (c *LFUCache) WhistPut(key string, v interface{}) (cur *LFU) {
+	c.Lock()
+	defer c.Unlock()
+	cur, exist := c.v[key]
+	// fmt.Println(exist, key, cur, c.v)
+	if !exist {
+		cur_remv, ok := c.remv[key]
+		if ok {
+			// resize
+			if len(c.v) < c.size {
+				cur = cur_remv
+				// cur.N++
+				cur.V = v
+				delete(c.remv, key)
+				goto ReSize_ADD
+			}
+			// c.revoke(key)
+			return cur_remv
+		}
+		// remove the last node
+		if len(c.v) >= c.size {
+			c.remove()
+		}
+		cur = NewLFU(key, v)
+	ReSize_ADD:
+		c.v[key] = cur
+		// cur will be the first node
+		if len(c.v) <= 1 {
+			c.last = cur
+			c.latest = cur
+			return
+		}
+		dst := c.loc(cur.N, c.last)
+		c.in(dst, cur)
+		return
+	}
+	cur.V = v
+	// cur.N++
+	if cur == c.latest {
+		return
+	}
+	c.move(cur, cur.pre)
+	return
+}
+
 func (c *LFUCache) Get(key string) (cur *LFU) {
 	c.Lock()
 	defer c.Unlock()
@@ -184,6 +239,7 @@ func (c *LFUCache) Set(key string, v interface{}) (cur *LFU) {
 		c.in(dst, cur)
 		return
 	}
+	cur.V = v
 	cur.N++
 	if cur == c.latest {
 		return
