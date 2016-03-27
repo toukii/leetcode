@@ -352,7 +352,11 @@ func (c *LFUCache) Remove(key string) {
 	for lfu := c.latest; lfu != nil; lfu = lfu.next {
 		if lfu.Key == key {
 			c.out(lfu)
-			c.Insize(1)
+			delete(c.v, key)
+			for k, v := range c.remv {
+				c.Set(k, v.V)
+				break
+			}
 		}
 	}
 	for k, _ := range c.remv {
