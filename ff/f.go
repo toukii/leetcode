@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/shaalx/goutils"
-	// "github.com/shaalx/membership/pkg3/httplib"
+	"github.com/toukii/goutils"
+	// "github.com/toukii/membership/pkg3/httplib"
 	"bufio"
 	"io/ioutil"
 	"net/http"
