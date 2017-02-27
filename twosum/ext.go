@@ -11,6 +11,7 @@ import (
 	"bufio"
 
 	qby "github.com/qiniu/bytes"
+	"github.com/everfore/rpcsv"
 )
 
 var (
@@ -36,6 +37,15 @@ func main() {
 	// Pipe(data)
 	// PipeWriter(data)
 	Qiniu()
+	Rpcsv()
+}
+
+func Rpcsv()  {
+	data["Content"]="RPCSV"
+	w:=rpcsv.NewBufWriter()
+	err:=tpl.Execute(w,data)
+	fmt.Println(err)
+	fmt.Printf("%v",w.Bytes())
 }
 
 func Qiniu()  {
@@ -46,6 +56,7 @@ func Qiniu()  {
 	err:=tpl.Execute(w, data)
 	fmt.Println("error:",err)
 	bs:=r.Bytes()
+	fmt.Println(bs)
 	fmt.Println("reader bytes:",string(bs),"|")
 	fmt.Println("origin bytes:",string(buf),"|")
 	data["Content"]="Ya"
