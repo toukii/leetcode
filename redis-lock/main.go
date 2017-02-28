@@ -87,12 +87,8 @@ func (l LockRedis)lock(k string, v int64)bool  {
 			t22v:=l.GetSet(k,v)
 			fmt.Println("getset-",t22v)
 			t22,err22:=t22v.Int64()
-			if err22 == redis.Nil {
+			if err22 == redis.Nil || t2 == t22 { // 获得锁
 				return true
-			}else{
-				if t2 == t22 { // 获得锁
-					return true;
-				}
 			}
 		}
 		time.Sleep(20)
