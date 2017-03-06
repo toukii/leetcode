@@ -13,7 +13,7 @@ type LockRedis struct {
 func ExampleNewClient() *redis.Client{
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "dvctsGH24VF5D3ccMk2FUYOCRozolDxE", // no password set
+		Password: "7rOszAMIBZENBIqa7zcp2zS9fTn8OrKW", // no password set
 		DB:       0,  // use default DB
 	})
 
@@ -57,6 +57,15 @@ func main() {
 	//fmt.Println(lock.lock("lock",now))
 	//lock.unlock("lock")
 	//fmt.Println(lock.lock("lock",now))
+	fmt.Println(lock.watch("a",10))
+}
+
+func (l LockRedis) watch(k string, v interface{}) bool{
+	err:=l.Watch(func(tx *redis.Tx)error {
+		return tx.Set(k,v,0).Err()
+	}, k)
+	fmt.Println(err)
+	return err == nil
 }
 
 func (l LockRedis)lock(k string, v int64)bool  {
