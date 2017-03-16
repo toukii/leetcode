@@ -58,6 +58,8 @@ func main() {
 	//lock.unlock("lock")
 	//fmt.Println(lock.lock("lock",now))
 	fmt.Println(lock.watch("a",10))
+	fmt.Println(lock.decr("a"))
+	fmt.Println(lock.Get("a").String())
 }
 
 func (l LockRedis) watch(k string, v interface{}) bool{
@@ -107,4 +109,18 @@ func (l LockRedis)lock(k string, v int64)bool  {
 
 func (l LockRedis) unlock(k string)  {
 	l.Del(k)
+}
+
+func (l LockRedis) decr(k string)bool  {
+
+	return nil == l.Watch(func(tx *redis.Tx)error{
+		vrs:=tx.Get(k)
+		v,err:=vrs.Int64()
+		if(err!=nil){
+			return err
+		}
+		status :=tx.Set(k,v-1,-1)
+		return status.Err()
+		//tx.Decr(k)
+	},k)
 }
