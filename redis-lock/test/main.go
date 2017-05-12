@@ -11,10 +11,36 @@ var(
 	lock LockRedis
 )
 
+func test()  {
+	lock.Set("testdecr",5,-1)
+	n:=30
+	c:=make(chan int,n)
+
+	for i := 0; i < n; i++ {
+		go func(){
+			ok:=lock.decr("testdecr")
+			if ok{
+				c<-1
+			}else{
+				c<-0
+			}
+		}()
+	}
+	count:=0
+	for i:=0;i<n;i++ {
+		if <-c==1{
+		count++
+		}
+	}
+	fmt.Println(count)
+}
+
 func main() {
 	client:=ExampleNewClient()
 	defer client.Close()
 	lock=LockRedis{client}
+	//test()
+	//return
 	m := macaron.Classic()
 	m.Group("/", func() {
 		m.Get("", get)
@@ -61,7 +87,6 @@ func ExampleNewClient() *redis.Client{
 
 
 func (l LockRedis) decr(k string)bool  {
-
 	watchErr:= l.Watch(func(tx *redis.Tx)error{
 		vrs:=tx.Get(k)
 		v,err:=vrs.Int64()
@@ -69,24 +94,30 @@ func (l LockRedis) decr(k string)bool  {
 			return err
 		}
 		if v<=0{
+			//fmt.Println(tx.Set(k,0,-1))
 			return fmt.Errorf("zero")
 		}
-		fmt.Println("current:",v)
-		//return tx.Decr(k).Err()
+		/*dec:=tx.Decr(k)
+		fmt.Println(dec,dec.Err())
+		return tx.Decr(k).Err()*/
 		//status :=tx.Set(k,v-1,-1)
 		//return status.Err()
 		status:=tx.GetSet(k,v-1)
-		fmt.Println(status)
+		fmt.Println(status,status.Err())
 		old,err2:=status.Int64()
 		if err2!=nil{
 			return err2
 		}
 
-		if old == v{
-			return nil
+		if old < v{
+			return fmt.Errorf("God, GETSET(old value):%d; bug GET(old value):%d, SET:%d.",old,v,v-1)
 		}
-		return fmt.Errorf("currence!")
+		if old != v{
+			return fmt.Errorf("currence!")
+		}
+
+		return status.Err()
 	},k)
-	fmt.Println("watchErr:",watchErr)
+	//fmt.Println("watch:",k,",result:",watchErr)
 	return nil== watchErr
 }
