@@ -11,13 +11,12 @@ func Equal8(input []int) (i, j int) {
 		return 0, 0
 	}
 	j = size - 1
-	for input[j] >= 8 {
-		j--
-	}
 	for i < j {
-		fmt.Println(input[i], input[j])
 		if input[i]+input[j] == 8 {
-			return input[i], input[j]
+			fmt.Printf("%d -- %d\n", input[i], input[j])
+			// return input[i], input[j]
+			i++
+			j--
 		} else if input[i]+input[j] > 8 {
 			j--
 		} else {
@@ -28,7 +27,7 @@ func Equal8(input []int) (i, j int) {
 }
 
 func TestEqual8(t *testing.T) {
-	input := []int{1, 3, 4, 5, 6, 7, 8, 9, 10}
+	input := []int{-5, -2, -1, 0, 1, 3, 4, 5, 6, 7, 8, 9, 10}
 	i, j := Equal8(input)
 	t.Logf("i:%d, j:%d\n", i, j)
 
