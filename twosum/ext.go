@@ -6,16 +6,16 @@ import (
 	"io"
 	"os"
 	// "testing"
+	"bufio"
 	"fmt"
 	"io/ioutil"
-	"bufio"
 
-	qby "github.com/qiniu/bytes"
 	"github.com/everfore/rpcsv"
+	qby "github.com/toukii/bytes"
 )
 
 var (
-	tpl *template.Template
+	tpl  *template.Template
 	data map[string]interface{}
 )
 
@@ -24,7 +24,7 @@ func init() {
 	data = make(map[string]interface{})
 }
 
-func Stdout(data map[string]interface{})  {
+func Stdout(data map[string]interface{}) {
 	data["Content"] = "World"
 	err := tpl.Execute(os.Stdout, data)
 	if err != nil {
@@ -40,44 +40,43 @@ func main() {
 	Rpcsv()
 }
 
-func Rpcsv()  {
-	data["Content"]="RPCSV"
-	w:=rpcsv.NewBufWriter()
-	err:=tpl.Execute(w,data)
+func Rpcsv() {
+	data["Content"] = "RPCSV"
+	w := rpcsv.NewBufWriter()
+	err := tpl.Execute(w, data)
 	fmt.Println(err)
-	fmt.Printf("%v",w.Bytes())
+	fmt.Printf("%v", w.Bytes())
 }
 
-func Qiniu()  {
+func Qiniu() {
 	data["Content"] = "Qiniu"
-	buf:=make([]byte,100,100)
-	r:=qby.NewReader(buf)
-	w:=qby.NewWriter(buf)
-	err:=tpl.Execute(w, data)
-	fmt.Println("error:",err)
-	bs:=r.Bytes()
+	buf := make([]byte, 100, 100)
+	r := qby.NewReader(buf)
+	w := qby.NewWriter(buf)
+	err := tpl.Execute(w, data)
+	fmt.Println("error:", err)
+	bs := r.Bytes()
 	fmt.Println(bs)
-	fmt.Println("reader bytes:",string(bs),"|")
-	fmt.Println("origin bytes:",string(buf),"|")
-	data["Content"]="Ya"
+	fmt.Println("reader bytes:", string(bs), "|")
+	fmt.Println("origin bytes:", string(buf), "|")
+	data["Content"] = "Ya"
 	w.Reset()
-	tpl.Execute(w,data)
-	fmt.Println("reader2 bytes:",string(r.Bytes()),"|",string(w.Bytes()),"|")
+	tpl.Execute(w, data)
+	fmt.Println("reader2 bytes:", string(r.Bytes()), "|", string(w.Bytes()), "|")
 }
 
-func PipeWriter(data map[string]interface{})  {
+func PipeWriter(data map[string]interface{}) {
 	w := io.PipeWriter{}
 	defer w.Close()
 	w.Write([]byte("pipeWriter"))
-		// err := tpl.Execute(w, data)
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
-		
-	
+	// err := tpl.Execute(w, data)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
 }
 
-func Pipe(data map[string]interface{})  {
+func Pipe(data map[string]interface{}) {
 	r, w := io.Pipe()
 	c := make(chan int, 1)
 	data["Content"] = "Golang"
@@ -90,16 +89,16 @@ func Pipe(data map[string]interface{})  {
 	// <-c
 }
 
-func bytesRead(r io.Reader)  {
+func bytesRead(r io.Reader) {
 	fmt.Println("bytesReader")
-	buf:=bytes.NewBuffer(make([]byte,0,100))
-	n,err:=buf.ReadFrom(r)
-	fmt.Println(n,err)
+	buf := bytes.NewBuffer(make([]byte, 0, 100))
+	n, err := buf.ReadFrom(r)
+	fmt.Println(n, err)
 	fmt.Println(string(buf.Bytes()))
 	fmt.Println("end bytesReader")
 }
 
-func bufReader(r io.Reader)  {
+func bufReader(r io.Reader) {
 	var buf = make([]byte, 64)
 	n, err := r.Read(buf)
 	if err != nil {
@@ -108,10 +107,10 @@ func bufReader(r io.Reader)  {
 	fmt.Printf("%q", buf[0:n+6])
 }
 
-func ioutilRead(r io.Reader)  {
+func ioutilRead(r io.Reader) {
 	fmt.Println("start ioutilRead")
-	bs,err:=ioutil.ReadAll(r)
-	fmt.Println(string(bs),err)
+	bs, err := ioutil.ReadAll(r)
+	fmt.Println(string(bs), err)
 	fmt.Println("end ioutilRead")
 }
 
@@ -120,10 +119,10 @@ func write(w io.Writer, data map[string]interface{}, c chan int) {
 	// defer func() {
 	// }()
 	fmt.Println(data)
-// c<-0
+	// c<-0
 	err := tpl.Execute(w, data)
 	fmt.Println("tpl.Execute")
-	wr:=bufio.NewWriter(w)
+	wr := bufio.NewWriter(w)
 	wr.WriteString("\n")
 	wr.Flush()
 	if err != nil {
